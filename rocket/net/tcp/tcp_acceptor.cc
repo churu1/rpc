@@ -49,13 +49,19 @@ int TcpAcceptor::accpet() {
       exit(0);
     }
     IPNetAddr peer_addr(client_addr);
-    INFOLOG("A client have accepted succ, peer addr [%s]", peer_addr.toString());
+    INFOLOG("A client have accepted succ, peer addr [%s]", peer_addr.toString().c_str());
+ 
     return client_fd;
   } else {
     // ...
+    return -1;
   }
 
   return 0;
+}
+
+int TcpAcceptor::getListenFd()  {
+  return m_listenfd;
 }
 
 

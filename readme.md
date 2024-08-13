@@ -6,7 +6,7 @@ protobuf 依赖库
 
 ```shell
 wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protobuf-cpp-3.19.4.tar.gz
-tar -xzfv protobuf-cpp-3.19.4.tar.gz
+tar -xzvf protobuf-cpp-3.19.4.tar.gz
 cd protobuf-cpp-3.19.4
 ./configure -prefix=/usr/local
 make -j4
@@ -22,7 +22,7 @@ unzip tinyxml_2_6_2.zip
 修改 makefile:
 OUTPUT := libtinyxml.a
 
-sudp cp libtinyxml.a /usr/lib/
+sudo cp libtinyxml.a /usr/lib/
 make -j4
 sudo mkdir /usr/include/tinyxml
 sudo cp tinyxml/*.h /usr/i
@@ -63,3 +63,6 @@ ${AR} $@ ${LDFLAGS} ${OBJS} ${LIBS} ${EXTRA_LIBS}。
 
 ## EventLoop模块
 
+## Tcp模块
+### TcpServer
+对于类成员函数作为回调函数，一定要对函数名进行取地址操作（为什么）？
