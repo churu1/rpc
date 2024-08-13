@@ -2,11 +2,14 @@
 #define ROCKET_NET_TCP_TCP_BUFFER_H
 
 #include <vector>
+#include <memory>
 
 namespace rocket {
 
 class TcpBuffer {
- private:
+ public:
+  typedef std::shared_ptr<TcpBuffer> s_ptr;
+
   TcpBuffer(int size);
 
   ~TcpBuffer();
@@ -33,13 +36,15 @@ class TcpBuffer {
 
   void moveWriteIndex(int size);
 
+ public:
+
+  std::vector<char> m_buffer;
 
  private:
   int m_read_idx = 0;
   int m_write_idx = 0;
   int m_size = 0;
 
-  std::vector<char> m_buffer;
 
 };
 

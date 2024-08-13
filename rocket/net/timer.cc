@@ -72,6 +72,7 @@ void Timer::onTimer() {
   DEBUGLOG("on timer");
   
   // 处理缓冲区数据，防止继续触发可读事件
+  // 注意这里是LT模式下的非阻塞读， 不是ET模式下的非阻塞读
   char buf[8];
   while (1) {
     if ((read(m_fd, buf, 8) == -1) && errno == EAGAIN) {

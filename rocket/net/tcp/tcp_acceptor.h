@@ -13,7 +13,7 @@ class TcpAcceptor {
   typedef std::shared_ptr<TcpAcceptor> s_ptr;
   TcpAcceptor(NetAddr::s_ptr local_addr);
 
-  int accpet();
+  std::pair<int, NetAddr::s_ptr> accpet();
 
   int getListenFd();
 

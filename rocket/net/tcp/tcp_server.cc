@@ -1,5 +1,6 @@
 #include "rocket/net/tcp/tcp_server.h"
 #include "rocket/net/eventloop.h"
+#include "rocket/net/tcp/tcp_connection.h"
 #include "rocket/common/log.h"
 #include "tcp_server.h"
 namespace rocket {
@@ -8,7 +9,7 @@ TcpServer::TcpServer(NetAddr::s_ptr local_addr) : m_local_addr(local_addr) {
 
   init();
 
-  INFOLOG("rocket RPC TcpServer listen success on [%s]", m_local_addr->toString());
+  INFOLOG("rocket RPC TcpServer listen success on [%s]", m_local_addr->toString().c_str());
 }
 
 TcpServer::~TcpServer() {
@@ -48,13 +49,15 @@ void TcpServer::init() {
 }
 
 void TcpServer::onAccept() {
-  int client_fd = m_acceptor->accpet();
-  //FdEvent client_fd_event(client_fd);
+  auto re = m_acceptor->accpet();
+  int client_fd = re.first;
+  NetAddr::s_ptr  peer_addr = re.second;
   m_client_counts++;
 
-  //TODO 把 client_fd 添加到任意的 io 线程里面
-  //m_io_thread_group->getIOThread()->getEventLoop()->addEpollEvent()
-
+  IOThread* io_thread = m_io_thread_group->getIOThread();
+  TcpConnection::s_ptr connection = std::make_shared<TcpConnection>(io_thread, client_fd, 128, peer_addr);
+  connection->setState(Connected);
+  m_clients.insert(connection);
   INFOLOG("TcpServer succ get client, fd=%d", client_fd);
 }
 

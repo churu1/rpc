@@ -17,7 +17,12 @@ namespace rocket {
 
     ~FdEvent();
 
+    void setNonBlock();
+
     void listen(TriggerEvent event_type, std::function<void()> callback);
+
+    // 取消监听
+    void cancel(TriggerEvent event_type);
 
     std::function<void()> handler(TriggerEvent evnet_type);
 
