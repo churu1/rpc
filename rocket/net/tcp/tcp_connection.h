@@ -2,8 +2,10 @@
 #define ROCKET_NET_TCP_TCP_CONNECTION_H
 
 #include <memory>
+#include <queue>
 #include "rocket/net/tcp/net_addr.h"
 #include "rocket/net/tcp/tcp_buffer.h"
+#include "rocket/net/abstract_coder.h"
 #include "rocket/net/io_thread.h"
 
 namespace rocket {
@@ -45,6 +47,13 @@ class TcpConnection {
 
   void setTcpConnectionType(TcpConnectionType type);
 
+  // 启动监听可写事件
+  void listenWrite();
+
+  // 启动监听可读事件
+  void listenRead();
+
+
  private:
 
   TcpBuffer::s_ptr m_in_buffer; // 接受缓冲区
@@ -63,6 +72,11 @@ class TcpConnection {
   TcpState m_state;
 
   TcpConnectionType m_connection_type = TcpConnectionByServer;
+
+  // std::pair<AbstractProtocol::s_ptr, std::function<void(AbstractProtocol::s_ptr)>>
+  std::queue<std::pair<AbstractProtocol::s_ptr, std::function<void(AbstractProtocol::s_ptr)>>> m_write_dones;
+
+  AbstractCoder* m_coder = NULL;
 };
 
 

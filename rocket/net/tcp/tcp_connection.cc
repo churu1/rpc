@@ -16,8 +16,7 @@ TcpConnection::TcpConnection(EventLoop* event_loop, int conn_fd, int buffer_size
 
   m_fd_event = FdEventGroup::GetFdEventGroup()->getFdEvent(conn_fd);
   m_fd_event->setNonBlock();
-  m_fd_event->listen(FdEvent::IN_EVENT, std::bind(&TcpConnection::OnRead, this));
-  m_event_loop->addEpollEvent(m_fd_event);
+  listenRead();
 }
 
 TcpConnection::~TcpConnection() {
@@ -93,9 +92,7 @@ void TcpConnection::excute() {
 
   m_out_buffer->writeToBuffer(msg.c_str(), msg.length());
 
-  m_fd_event->listen(FdEvent::OUT_EVENT, std::bind(&TcpConnection::OnWrite, this));
-
-  m_event_loop->addEpollEvent(m_fd_event);
+  listenWrite();
 }
 
 void TcpConnection::OnWrite() {
@@ -104,6 +101,12 @@ void TcpConnection::OnWrite() {
   if (m_state != Connected) {
     ERRORLOG("OnWrite error, client has already disconnected, addr[%s], clientfd[%d]", m_peer_addr->toString().c_str(), m_fd );
     return;
+  }
+
+  if (m_connection_type == TcpConnectionByClient) {
+    // 1.将 message encode 得到字节流
+    // 2.将数据写入到 buffer 中, 然后全部发送
+    
   }
 
   bool is_write_all = false;
@@ -185,4 +188,20 @@ void TcpConnection::shutdown() {
 void TcpConnection::setTcpConnectionType(TcpConnectionType type) {
   m_connection_type = type;
 }
+
+void TcpConnection::listenWrite()
+{
+  m_fd_event->listen(FdEvent::OUT_EVENT, std::bind(&TcpConnection::OnWrite, this));
+
+  m_event_loop->addEpollEvent(m_fd_event);
+
+}
+
+void TcpConnection::listenRead() {
+  m_fd_event->listen(FdEvent::IN_EVENT, std::bind(&TcpConnection::OnRead, this));
+
+  m_event_loop->addEpollEvent(m_fd_event);
+
+}
+
 }

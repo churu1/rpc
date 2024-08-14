@@ -68,6 +68,8 @@ void TcpClient::connect(std::function<void()> done) {
 
 void TcpClient::writeMessage(AbstractProtocol::s_ptr request, std::function<void(AbstractProtocol::s_ptr)> done)
 {
+  // 1.把message对象写入 connection 的 buffer 中，done 也写入
+  // 2.启动 connection 可写事件
 }
 
 void TcpClient::readMessage(AbstractProtocol::s_ptr request, std::function<void(AbstractProtocol::s_ptr)> done)

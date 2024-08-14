@@ -70,3 +70,5 @@ ${AR} $@ ${LDFLAGS} ${OBJS} ${LIBS} ${EXTRA_LIBS}。
 服务器半关闭后（即关闭读写后），为什么还能处理客户端发送来的FIN报文？
 
 为什么将connect用的套接字设置为非阻塞后，是去监听该套接字的可写事件; 我明白了，这个 fd 是用于与服务端通信的fd，当我们调用connect去连接服务端的时候，就是往fd缓冲区中写入内容
+
+rpc相关内容学习：http://www.52im.net/thread-2996-1-1.html
