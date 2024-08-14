@@ -8,8 +8,8 @@ namespace rocket {
 
 
 
-TcpConnection::TcpConnection(IOThread *io_thread, int conn_fd, int buffer_size, NetAddr::s_ptr peer_addr) 
-  : m_io_thread(io_thread), m_fd(conn_fd), m_peer_addr(peer_addr), m_state(NotConnected){
+TcpConnection::TcpConnection(EventLoop* event_loop, int conn_fd, int buffer_size, NetAddr::s_ptr peer_addr) 
+  :m_event_loop(event_loop), m_fd(conn_fd), m_peer_addr(peer_addr), m_state(NotConnected){
 
   m_in_buffer = std::make_shared<TcpBuffer>(buffer_size);
   m_out_buffer = std::make_shared<TcpBuffer>(buffer_size);
@@ -17,7 +17,7 @@ TcpConnection::TcpConnection(IOThread *io_thread, int conn_fd, int buffer_size, 
   m_fd_event = FdEventGroup::GetFdEventGroup()->getFdEvent(conn_fd);
   m_fd_event->setNonBlock();
   m_fd_event->listen(FdEvent::IN_EVENT, std::bind(&TcpConnection::OnRead, this));
-  io_thread->getEventLoop()->addEpollEvent(m_fd_event);
+  m_event_loop->addEpollEvent(m_fd_event);
 }
 
 TcpConnection::~TcpConnection() {
@@ -95,7 +95,7 @@ void TcpConnection::excute() {
 
   m_fd_event->listen(FdEvent::OUT_EVENT, std::bind(&TcpConnection::OnWrite, this));
 
-  m_io_thread->getEventLoop()->addEpollEvent(m_fd_event);
+  m_event_loop->addEpollEvent(m_fd_event);
 }
 
 void TcpConnection::OnWrite() {
@@ -135,7 +135,7 @@ void TcpConnection::OnWrite() {
   
   if (is_write_all) {
     m_fd_event->cancel(FdEvent::OUT_EVENT);
-    m_io_thread->getEventLoop()->addEpollEvent(m_fd_event);
+    m_event_loop->addEpollEvent(m_fd_event);
   }
 
 }
@@ -160,7 +160,7 @@ void TcpConnection::clear() {
   m_fd_event->cancel(FdEvent::OUT_EVENT);
 
 
-  m_io_thread->getEventLoop()->deleteEpollEvent(m_fd_event);
+  m_event_loop->deleteEpollEvent(m_fd_event);
 
   m_state = Closed;
 
@@ -182,4 +182,7 @@ void TcpConnection::shutdown() {
   ::shutdown(m_fd, SHUT_RDWR);
 }
 
+void TcpConnection::setTcpConnectionType(TcpConnectionType type) {
+  m_connection_type = type;
+}
 }
