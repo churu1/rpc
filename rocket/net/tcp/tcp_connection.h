@@ -28,7 +28,7 @@ class TcpConnection {
 
 
  public:
-  TcpConnection(EventLoop* evnet_loop, int conn_fd, int buffer_size, NetAddr::s_ptr peer_addr);
+  TcpConnection(EventLoop* evnet_loop, int conn_fd, int buffer_size, NetAddr::s_ptr peer_addr, TcpConnectionType type = TcpConnectionByServer);
   ~TcpConnection();
   
   void OnRead();
@@ -53,6 +53,11 @@ class TcpConnection {
   // 启动监听可读事件
   void listenRead();
 
+  void pushSendMessage(AbstractProtocol::s_ptr, std::function<void(AbstractProtocol::s_ptr)>);
+
+  
+  void pushReadMessage(const std::string& req_id, std::function<void(AbstractProtocol::s_ptr)> done);
+
 
  private:
 
@@ -72,11 +77,15 @@ class TcpConnection {
   TcpState m_state;
 
   TcpConnectionType m_connection_type = TcpConnectionByServer;
+  
+  AbstractCoder* m_coder = NULL;
 
   // std::pair<AbstractProtocol::s_ptr, std::function<void(AbstractProtocol::s_ptr)>>
-  std::queue<std::pair<AbstractProtocol::s_ptr, std::function<void(AbstractProtocol::s_ptr)>>> m_write_dones;
+  std::vector<std::pair<AbstractProtocol::s_ptr, std::function<void(AbstractProtocol::s_ptr)>>> m_write_dones;
+  
+  // key 为 req_id
+  std::map<std::string,  std::function<void(AbstractProtocol::s_ptr)>> m_read_dones;
 
-  AbstractCoder* m_coder = NULL;
 };
 
 

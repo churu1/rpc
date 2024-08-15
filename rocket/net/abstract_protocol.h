@@ -4,7 +4,7 @@
 #include <memory>
 #include "rocket/net/tcp/tcp_buffer.h"
 namespace rocket {
-class AbstractProtocol {
+class AbstractProtocol : public std::enable_shared_from_this<AbstractProtocol> {
  public:
   typedef std::shared_ptr<AbstractProtocol> s_ptr;
   std::string getReqId() {
@@ -15,6 +15,9 @@ class AbstractProtocol {
     m_req_id = req_id;
   }
 
+  virtual ~AbstractProtocol() {
+
+  }
 
  protected:
   std::string m_req_id; // 唯一标识一个请求或者响应

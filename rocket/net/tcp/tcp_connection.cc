@@ -3,24 +3,35 @@
 #include "rocket/net/fd_event_group.h"
 #include "rocket/common/log.h"
 #include "tcp_connection.h"
+#include "rocket/net/string_coder.h"
 
 namespace rocket {
 
 
 
-TcpConnection::TcpConnection(EventLoop* event_loop, int conn_fd, int buffer_size, NetAddr::s_ptr peer_addr) 
-  :m_event_loop(event_loop), m_fd(conn_fd), m_peer_addr(peer_addr), m_state(NotConnected){
+TcpConnection::TcpConnection(EventLoop* event_loop, int conn_fd, int buffer_size, NetAddr::s_ptr peer_addr, TcpConnectionType type) 
+  :m_event_loop(event_loop), m_fd(conn_fd), m_peer_addr(peer_addr), m_state(NotConnected), m_connection_type(type) {
 
   m_in_buffer = std::make_shared<TcpBuffer>(buffer_size);
   m_out_buffer = std::make_shared<TcpBuffer>(buffer_size);
 
   m_fd_event = FdEventGroup::GetFdEventGroup()->getFdEvent(conn_fd);
   m_fd_event->setNonBlock();
-  listenRead();
+  
+  if (m_connection_type == TcpConnectionByServer) {
+    listenRead();
+
+  }
+
+  m_coder = new StringCoder();
 }
 
 TcpConnection::~TcpConnection() {
   DEBUGLOG("~TcpConnection");
+  if (m_coder) {
+    delete m_coder;
+    m_coder = NULL;
+  }
 }
 
 void TcpConnection::OnRead() {
@@ -76,23 +87,38 @@ void TcpConnection::OnRead() {
 
 
 void TcpConnection::excute() {
-  DEBUGLOG("start excute");
-  // 将 RPC 请求执行业务逻辑，获取 RPC 响应，再把 RPC 相应发送回去
-  std::vector<char> tmp;
-  int size = m_in_buffer->readAble();
-  m_in_buffer->readFromBuffer(tmp, size);
+  if (m_connection_type == TcpConnectionByServer) {
+    DEBUGLOG("start excute");
+    // 将 RPC 请求执行业务逻辑，获取 RPC 响应，再把 RPC 相应发送回去
+    std::vector<char> tmp;
+    int size = m_in_buffer->readAble();
+    m_in_buffer->readFromBuffer(tmp, size);
 
 
-  std::string msg;
-  for (int i = 0; i < (int)tmp.size(); ++i) {
-    msg += tmp[i];
-  }
-  
-  INFOLOG("success get request[%s] from peer client[%s]", msg.c_str(), m_peer_addr->toString().c_str());
+    std::string msg;
+    for (int i = 0; i < (int)tmp.size(); ++i) {
+      msg += tmp[i];
+    }
+    
+    INFOLOG("success get request[%s] from peer client[%s]", msg.c_str(), m_peer_addr->toString().c_str());
 
-  m_out_buffer->writeToBuffer(msg.c_str(), msg.length());
+    m_out_buffer->writeToBuffer(msg.c_str(), msg.length());
 
-  listenWrite();
+    listenWrite();
+  } else {
+    // 从 buffer 中 decode 得到 message 对象，判断是否 req_id 相等，相等则成功, 执行其回调
+    std::vector<AbstractProtocol::s_ptr> result;
+    m_coder->decode(result, m_in_buffer);
+
+    for (size_t i = 0; i < result.size(); ++i) {
+      std::string req_id = result[i]->getReqId();
+      auto it = m_read_dones.find(req_id);
+      if (m_read_dones.find(req_id) != m_read_dones.end()) {
+        it->second(result[i]);
+      }
+    }
+  }  
+
 }
 
 void TcpConnection::OnWrite() {
@@ -106,7 +132,12 @@ void TcpConnection::OnWrite() {
   if (m_connection_type == TcpConnectionByClient) {
     // 1.将 message encode 得到字节流
     // 2.将数据写入到 buffer 中, 然后全部发送
-    
+    std::vector<AbstractProtocol::s_ptr> messages;
+    for (size_t i = 0; i < m_write_dones.size(); ++i) {
+      messages.push_back(m_write_dones[i].first );
+    }
+
+    m_coder->encode(messages, m_out_buffer);
   }
 
   bool is_write_all = false;
@@ -123,7 +154,7 @@ void TcpConnection::OnWrite() {
     DEBUGLOG("success write %d bytes from addr[%s], client fd[%d]", rt, m_peer_addr->toString().c_str(), m_fd);
 
     if (rt >= write_size) {
-      DEBUGLOG("no data need to send to client[%s]", m_peer_addr->toString().c_str());
+      DEBUGLOG("had written down, no data need to send to client[%s]", m_peer_addr->toString().c_str());
       is_write_all = true;
       break;
     }
@@ -139,6 +170,13 @@ void TcpConnection::OnWrite() {
   if (is_write_all) {
     m_fd_event->cancel(FdEvent::OUT_EVENT);
     m_event_loop->addEpollEvent(m_fd_event);
+  }
+
+  if (m_connection_type == TcpConnectionByClient) {
+    for (size_t i = 0; i < m_write_dones.size(); ++i) {
+      m_write_dones[i].second(m_write_dones[i].first);
+    }
+    m_write_dones.clear();
   }
 
 }
@@ -204,4 +242,11 @@ void TcpConnection::listenRead() {
 
 }
 
+void TcpConnection::pushSendMessage(AbstractProtocol::s_ptr message, std::function<void(AbstractProtocol::s_ptr)> done) {
+  m_write_dones.emplace_back(message, done);
+}
+
+void TcpConnection::pushReadMessage(const std::string &req_id, std::function<void(AbstractProtocol::s_ptr)> done) {
+  m_read_dones.insert(std::make_pair(req_id, done));
+}
 }
