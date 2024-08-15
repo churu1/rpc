@@ -75,3 +75,20 @@ rpc相关内容学习：http://www.52im.net/thread-2996-1-1.html
 
 什么是`enable_shared_from_this`类？继承它有什么用？
 `dynamic_pointer_cast`的作用是什么？
+
+centOS命令：
+`ip add`，查看所有网卡信息
+卸载网卡：
+``` shell
+ifconfig virbr0 down
+brctl delbr virbr0
+nmcli device delete virbr0-nic
+systemctl mask libvirtd.servicesystemctl 
+disable libvirtd.service
+```
+protobuf 与 json 的对比, chatgpt 回答：
+`https://chatgpt.com/share/aa34e3b2-0ca9-49d3-a4c6-3fbabfce682f`
+
+为什么在这个项目中，需要将对端的整形通过ntohl转化为本地字节序，而在 FocusTV项目中不需要?
+
+去复习一下四种类型转换的使用场景
