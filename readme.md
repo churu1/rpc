@@ -95,3 +95,7 @@ protobuf 与 json 的对比, chatgpt 回答：
 
 string 的 find_first_of 方法
 protobuf 的相关接口去了解一下
+
+protobuf的接口 ShortDebugString() 了解一下
+
+去学习一下cmake

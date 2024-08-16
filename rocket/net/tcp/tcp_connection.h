@@ -29,7 +29,7 @@ class TcpConnection {
 
 
  public:
-  TcpConnection(EventLoop* evnet_loop, int conn_fd, int buffer_size, NetAddr::s_ptr peer_addr, TcpConnectionType type = TcpConnectionByServer);
+  TcpConnection(EventLoop* evnet_loop, int conn_fd, int buffer_size, NetAddr::s_ptr peer_addr, NetAddr::s_ptr local_addr, TcpConnectionType type = TcpConnectionByServer);
   ~TcpConnection();
   
   void OnRead();
@@ -59,6 +59,10 @@ class TcpConnection {
   
   void pushReadMessage(const std::string& req_id, std::function<void(AbstractProtocol::s_ptr)> done);
 
+  NetAddr::s_ptr getLocalAddr();
+  NetAddr::s_ptr getPeerAddr();
+
+
 
  private:
 
@@ -69,8 +73,8 @@ class TcpConnection {
   
   int m_fd = -1;
   
-  NetAddr::s_ptr m_local_addr;
-  NetAddr::s_ptr m_peer_addr;
+  NetAddr::s_ptr m_local_addr = NULL;
+  NetAddr::s_ptr m_peer_addr = NULL;
   
   FdEvent* m_fd_event = NULL;
 
