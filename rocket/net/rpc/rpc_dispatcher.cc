@@ -12,7 +12,17 @@
 
 namespace rocket {
 
-void RpcDispathcer::dispatch(AbstractProtocol::s_ptr request, AbstractProtocol::s_ptr response, TcpConnection* connection) {
+static RpcDispatcher* g_rpc_dispatcher = NULL;
+
+RpcDispatcher* RpcDispatcher::GetRpcDispatcher() {
+  if (g_rpc_dispatcher) {
+    return g_rpc_dispatcher;
+  }
+  g_rpc_dispatcher = new RpcDispatcher();
+  return g_rpc_dispatcher;
+}
+
+void RpcDispatcher::dispatch(AbstractProtocol::s_ptr request, AbstractProtocol::s_ptr response, TcpConnection* connection) {
 
   std::shared_ptr<TinyPBProtocol> req_protocol = std::dynamic_pointer_cast<TinyPBProtocol>(request);
   std::shared_ptr<TinyPBProtocol> rsp_protocol = std::dynamic_pointer_cast<TinyPBProtocol>(response);
@@ -24,7 +34,7 @@ void RpcDispathcer::dispatch(AbstractProtocol::s_ptr request, AbstractProtocol::
   rsp_protocol->m_req_id = request->m_req_id;
   rsp_protocol->m_method_name = req_protocol->m_method_name;
 
-  if (parseServiceFullName(method_full_name, service_name, method_name)) {
+  if (!parseServiceFullName(method_full_name, service_name, method_name)) {
     setTinyPBError(rsp_protocol ,ERROR_PARSE_SERVICE_NAME, "parse service name error");
     return;
   }
@@ -78,7 +88,7 @@ void RpcDispathcer::dispatch(AbstractProtocol::s_ptr request, AbstractProtocol::
   rsp_protocol->m_method_name = req_protocol->m_method_name;
   rsp_protocol->m_err_code = 0;
 
-  if (rsp_msg->SerializeToString(&(rsp_protocol->m_pb_data))) {
+  if (!rsp_msg->SerializeToString(&(rsp_protocol->m_pb_data))) {
     ERRORLOG("%s | serilize error, origin message [%s]", rsp_protocol->m_req_id.c_str(), rsp_msg->ShortDebugString().c_str());
     setTinyPBError(rsp_protocol ,ERROR_FAILED_SERIALIZE, "serilize error");
     
@@ -104,18 +114,18 @@ void RpcDispathcer::dispatch(AbstractProtocol::s_ptr request, AbstractProtocol::
   rsp_msg = NULL;
 }
 
-void RpcDispathcer::registerService(service_ptr service) {
+void RpcDispatcher::registerService(service_ptr service) {
   std::string service_name = service->GetDescriptor()->full_name();
   m_service_map[service_name] = service;
 }
 
-void RpcDispathcer::setTinyPBError(std::shared_ptr<TinyPBProtocol> msg, int32_t error_code, const std::string err_info) {
+void RpcDispatcher::setTinyPBError(std::shared_ptr<TinyPBProtocol> msg, int32_t error_code, const std::string err_info) {
   msg->m_err_code = error_code;
   msg->m_err_info = err_info;
   msg->m_err_info_len = err_info.length();
 }
 
-bool RpcDispathcer::parseServiceFullName(const std::string full_name, std::string &service_name, std::string &method_name) {
+bool RpcDispatcher::parseServiceFullName(const std::string full_name, std::string &service_name, std::string &method_name) {
   if (full_name.empty()) {
     ERRORLOG("full name empty");
     return false;
@@ -130,7 +140,7 @@ bool RpcDispathcer::parseServiceFullName(const std::string full_name, std::strin
   service_name = full_name.substr(0, i);
   method_name = full_name.substr(i + 1, full_name.length() - i - 1);
 
-  INFOLOG("parse service_name[%s] and method_name from full name[%s]", service_name.c_str(), method_name.c_str());
+  INFOLOG("parse service_name[%s] and method_name[%s] from full name[%s]", service_name.c_str(), method_name.c_str(), full_name.c_str());
 
   return true;
 }

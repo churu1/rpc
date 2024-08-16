@@ -11,8 +11,10 @@ namespace rocket {
 
 class TcpConnection;
 
-class RpcDispathcer {
+class RpcDispatcher {
  public:
+  
+  static RpcDispatcher* GetRpcDispatcher();
 
   typedef std::shared_ptr<google::protobuf::Service> service_ptr;
 
