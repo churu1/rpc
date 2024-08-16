@@ -92,3 +92,6 @@ protobuf 与 json 的对比, chatgpt 回答：
 为什么在这个项目中，需要将对端的整形通过ntohl转化为本地字节序，而在 FocusTV项目中不需要?
 
 去复习一下四种类型转换的使用场景
+
+string 的 find_first_of 方法
+protobuf 的相关接口去了解一下

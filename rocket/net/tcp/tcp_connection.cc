@@ -20,7 +20,7 @@ TcpConnection::TcpConnection(EventLoop* event_loop, int conn_fd, int buffer_size
   
   if (m_connection_type == TcpConnectionByServer) {
     listenRead();
-
+    m_dispathcer = std::make_shared<RpcDispathcer>();
   }
 
   m_coder = new TinyPBCoder();
@@ -98,9 +98,9 @@ void TcpConnection::excute() {
       // 2.将响应 message 放入到发送缓冲区，监听可写事件回包
       INFOLOG("success get request[%s] from client[%s]", result[i]->m_req_id.c_str(), m_peer_addr->toString().c_str());
       std::shared_ptr<TinyPBProtocol> message = std::make_shared<TinyPBProtocol>();
-      message->m_pb_data = "hello this is rocket rpc test data";
-      message->m_req_id = result[i]->m_req_id;
-
+      // message->m_pb_data = "hello this is rocket rpc test data";
+      // message->m_req_id = result[i]->m_req_id;
+      m_dispathcer->dispatch(result[i], message);
       reply_messages.emplace_back(message);
     }
     m_coder->encode(reply_messages, m_out_buffer);
