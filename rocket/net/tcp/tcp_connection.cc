@@ -95,24 +95,24 @@ void TcpConnection::excute() {
     for (size_t i = 0; i < result.size(); ++i) {
       // 1.针对每一个请求，调用 rpc 方法， 获取响应 message
       // 2.将响应 message 放入到发送缓冲区，监听可写事件回包
-      INFOLOG("success get request[%s] from client[%s]", result[i]->m_req_id.c_str(), m_peer_addr->toString().c_str());
+      INFOLOG("success get request[%s] from client[%s]", result[i]->m_msg_id.c_str(), m_peer_addr->toString().c_str());
       std::shared_ptr<TinyPBProtocol> message = std::make_shared<TinyPBProtocol>();
       // message->m_pb_data = "hello this is rocket rpc test data";
-      // message->m_req_id = result[i]->m_req_id;
+      // message->m_msg_id = result[i]->m_msg_id;
       RpcDispatcher::GetRpcDispatcher()->dispatch(result[i], message, this);
       reply_messages.emplace_back(message);
     }
     m_coder->encode(reply_messages, m_out_buffer);
     listenWrite();
   } else {
-    // 从 buffer 中 decode 得到 message 对象，判断是否 req_id 相等，相等则成功, 执行其回调
+    // 从 buffer 中 decode 得到 message 对象，判断是否 msg_id 相等，相等则成功, 执行其回调
     std::vector<AbstractProtocol::s_ptr> result;
     m_coder->decode(result, m_in_buffer);
 
     for (size_t i = 0; i < result.size(); ++i) {
-      std::string req_id = result[i]->m_req_id;
-      auto it = m_read_dones.find(req_id);
-      if (m_read_dones.find(req_id) != m_read_dones.end()) {
+      std::string msg_id = result[i]->m_msg_id;
+      auto it = m_read_dones.find(msg_id);
+      if (m_read_dones.find(msg_id) != m_read_dones.end()) {
         it->second(result[i]);
       }
     }
@@ -245,8 +245,8 @@ void TcpConnection::pushSendMessage(AbstractProtocol::s_ptr message, std::functi
   m_write_dones.emplace_back(message, done);
 }
 
-void TcpConnection::pushReadMessage(const std::string &req_id, std::function<void(AbstractProtocol::s_ptr)> done) {
-  m_read_dones.insert(std::make_pair(req_id, done));
+void TcpConnection::pushReadMessage(const std::string &msg_id, std::function<void(AbstractProtocol::s_ptr)> done) {
+  m_read_dones.insert(std::make_pair(msg_id, done));
 }
 
 
