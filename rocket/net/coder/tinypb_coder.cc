@@ -85,7 +85,7 @@ void TinyPBCoder::decode(std::vector<AbstractProtocol::s_ptr> &out_messages, Tcp
       char msg_id[100] = {0};
       memcpy(&msg_id[0], &tmp[msg_id_index], message->m_msg_id_len);
       message->m_msg_id = std::string(msg_id);
-      DEBUGLOG("parse msg_id=%s", message->m_msg_id.c_str());
+      DEBUGLOG("parse msg_id=[%s]", message->m_msg_id.c_str());
       
       int method_name_len_index = msg_id_index + message->m_msg_id_len;
       if (method_name_len_index >= end_index) {
@@ -99,7 +99,7 @@ void TinyPBCoder::decode(std::vector<AbstractProtocol::s_ptr> &out_messages, Tcp
       char method_name[500] = {0};
       memcpy(&method_name[0], &tmp[method_name_index], message->m_method_name_len);
       message->m_method_name = std::string(method_name);
-      DEBUGLOG("parse method name=%s", message->m_method_name.c_str());
+      DEBUGLOG("parse method name=[%s]", message->m_method_name.c_str());
 
       int error_code_index = method_name_index + message->m_method_name_len;
       if (error_code_index >= end_index) {
@@ -122,7 +122,7 @@ void TinyPBCoder::decode(std::vector<AbstractProtocol::s_ptr> &out_messages, Tcp
       char error_info[500] = {0};
       memcpy(&error_info[0], &tmp[error_info_index], message->m_err_info_len);
       message->m_err_info = std::string(error_info);
-      DEBUGLOG("parse msg_id=%s", message->m_msg_id.c_str());
+      DEBUGLOG("parse error info=[%s]", message->m_err_info.c_str());
 
 
       int pb_data_len = message->m_pk_len - message->m_method_name_len 

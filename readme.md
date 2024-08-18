@@ -99,3 +99,7 @@ protobuf 的相关接口去了解一下
 protobuf的接口 ShortDebugString() 了解一下
 
 去学习一下cmake
+
+一个类里面有多个智能指针对象，当该类对象的智能指针 reset 了，类对象内部的智能指针对象会怎么样？
+
+EPOLLHUP 和 EPOLLERR 错误

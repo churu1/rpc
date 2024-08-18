@@ -10,6 +10,8 @@ namespace rocket {
 
 class RpcClosure : public google::protobuf::Closure{
  public:
+  RpcClosure(std::function<void()> cb) : m_cb(cb) {}
+  
   virtual void Run() {
     if (m_cb) {
       m_cb();

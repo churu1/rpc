@@ -127,6 +127,19 @@ namespace rocket {
             DEBUGLOG("fd %d trigger EPOLLOUT event", fd_event->getFd());
             addTask(fd_event->handler(FdEvent::OUT_EVENT));
           }
+          // if (!(trigger_event.events & EPOLLIN) && !(trigger_event.events & EPOLLOUT)) {
+          //   int event = (int)(trigger_event.events);
+          //   DEBUGLOG("unknow event = [%d]", event);
+          // }
+          if (trigger_event.events & EPOLLERR) {
+            DEBUGLOG("fd %d trigger EPOLLERROR event", fd_event->getFd());
+            deleteEpollEvent(fd_event);
+            if (fd_event->handler(FdEvent::ERROR_EVENT) != nullptr) {
+              int eventfd = (int)fd_event->getFd();
+              DEBUGLOG("fd %d add error callback", eventfd);
+              addTask(fd_event->handler(FdEvent::OUT_EVENT));
+            }
+          }
         }
       }
 
@@ -139,6 +152,7 @@ namespace rocket {
 
   void EventLoop::stop() {
     m_stop_flag = true;
+    wakeup();
   }
 
   void EventLoop::addEpollEvent(FdEvent *event) {
