@@ -5,6 +5,7 @@
 #include <memory>
 #include "rocket/net/tcp/net_addr.h"
 #include "rocket/net/tcp/tcp_client.h"
+#include "rocket/net/timer_event.h"
 
 
 namespace rocket {
@@ -41,6 +42,9 @@ class RpcChannel : public google::protobuf::RpcChannel, public std::enable_share
 
   TcpClient* getTcpClient();
 
+  TimerEvent::s_ptr getTimerEvent();
+
+
  private:
   NetAddr::s_ptr m_peer_addr = nullptr;
   NetAddr::s_ptr m_local_addr = nullptr;
@@ -53,6 +57,8 @@ class RpcChannel : public google::protobuf::RpcChannel, public std::enable_share
   TcpClient::s_ptr m_client = nullptr;
 
   bool m_is_init = false;
+
+  TimerEvent::s_ptr m_timer_event = nullptr;
 };
 
 
