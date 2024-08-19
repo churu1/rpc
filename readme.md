@@ -105,3 +105,7 @@ protobuf的接口 ShortDebugString() 了解一下
 EPOLLHUP 和 EPOLLERR 错误
 
 智能指针是不是重载了 ->运算符，使得通过->运算符来访问的函数是其内部封装的指针所指向的函数
+
+fwrite(i.c_str(), 1, i.length(), logger->m_file_handler);
+
+tail -f 命令

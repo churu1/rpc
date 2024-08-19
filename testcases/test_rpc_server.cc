@@ -26,13 +26,14 @@ class OrderImpl : public Order {
                       ::makeOrderResponse* response,
                       ::google::protobuf::Closure* done) {
 
-    DEBUGLOG("start sleep 10s");
+    APPDEBUGLOG("start sleep 10s");
     if (request->price() < 10) {
       response->set_ret_code(-1);
       response->set_res_info("short balance");
       return;
     }
     response->set_order_id("20240816");
+    APPDEBUGLOG("call  makeOrder success");
 
   }
 
@@ -40,7 +41,7 @@ class OrderImpl : public Order {
 };
 
 void test_tcp_server() {
-  rocket::IPNetAddr::s_ptr addr = std::make_shared<rocket::IPNetAddr>("127.0.0.1", 12345);
+  rocket::IPNetAddr::s_ptr addr = std::make_shared<rocket::IPNetAddr>("127.0.0.1", 12346);
   DEBUGLOG("create addr %s", addr->toString().c_str());
   
   rocket::TcpServer tcp_server(addr);

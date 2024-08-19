@@ -64,7 +64,7 @@ void test_tcp_client() {
 
 void test_rcp_channel() {
 
-  NEWRPCCHANNEL("127.0.0.1:12345", channel);
+  NEWRPCCHANNEL("127.0.0.1:12346", channel);
   NEWMESSAGE(makeOrderRequest, request);
   NEWMESSAGE(makeOrderResponse, response)
   request->set_price(100);
@@ -85,18 +85,18 @@ void test_rcp_channel() {
     }
 
     INFOLOG("now exit eventloop");
-    channel->getTcpClient()->stop();
+    //channel->getTcpClient()->stop();
     channel.reset();  
   });
   
   
-  CALLRPC("127.0.0.1:12345", makeOrder, controller, request, response, closure);
+  CALLRPC("127.0.0.1:12346", makeOrder, controller, request, response, closure);
 }
 
 
 int main() {
 
-  rocket::Config::SetGlobalConfig("../conf/rocket.xml");
+  rocket::Config::SetGlobalConfig("../conf/rocket_client.xml");
   rocket::Logger::InitGlobalLogger();
 
   test_rcp_channel();
