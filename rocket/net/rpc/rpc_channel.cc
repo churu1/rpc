@@ -79,7 +79,7 @@ void RpcChannel::CallMethod(const google::protobuf::MethodDescriptor *method,
 
     m_timer_event = std::make_shared<TimerEvent>(my_controller->GetTimeout(), false, [my_controller, channel]() mutable {
     my_controller->StartCancel();
-    my_controller->SetError(ERROR_RPC_CALL_TIMEOUT, "rpc call timeout" + std::to_string(my_controller->GetTimeout()));
+    my_controller->SetError(ERROR_RPC_CALL_TIMEOUT, "rpc call timeout " + std::to_string(my_controller->GetTimeout()));
 
     if (channel->getClosure()) {
       channel->getClosure()->Run();

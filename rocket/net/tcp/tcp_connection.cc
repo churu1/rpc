@@ -150,7 +150,7 @@ void TcpConnection::OnWrite() {
     int read_index = m_out_buffer->readIndex();
 
     int rt = write(m_fd, &m_out_buffer->m_buffer[read_index], write_size);
-    DEBUGLOG("success write %d bytes from addr[%s], client fd[%d]", rt, m_peer_addr->toString().c_str(), m_fd);
+    DEBUGLOG("success write %d bytes to addr[%s], client fd[%d]", rt, m_peer_addr->toString().c_str(), m_fd);
 
     if (rt >= write_size) {
       DEBUGLOG("had written down, no data need to send to client[%s]", m_peer_addr->toString().c_str());
