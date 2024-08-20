@@ -17,7 +17,7 @@ Logger* Logger::GetGlobalLogger() {
 
 void Logger::InitGlobalLogger(int type /*=1*/) {
   LogLevel global_log_level = StringToLogLevel(Config::GetGlobalConfig()->m_log_level);
-  g_logger = new Logger(global_log_level, 0);
+  g_logger = new Logger(global_log_level, type);
   g_logger->init();
 }
 
