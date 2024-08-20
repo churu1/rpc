@@ -1,5 +1,6 @@
 #include "tinyxml/tinyxml.h"
 #include "rocket/common/config.h"
+#include "config.h"
 
 
 #define READ_XML_NODE(name, parent) \
@@ -28,9 +29,13 @@ Config* Config::GetGlobalConfig() {
   return g_config;
 }
 
-void Config::SetGlobalConfig(const char* xmlfie) {
+void Config::SetGlobalConfig(const char* xmlfile) {
   if (g_config == NULL) {
-    g_config = new Config(xmlfie);
+    if (xmlfile != NULL) {
+      g_config = new Config(xmlfile);
+    } else {
+      g_config = new Config();
+    }
   }
 }
 
@@ -46,6 +51,7 @@ Config::Config(const char* xmlfile) {
   READ_XML_NODE(root, xml_document);
 
   READ_XML_NODE(log, root_node);
+  READ_XML_NODE(server, root_node);
 
   READ_STR_FROM_XML_NODE(log_level, log_node);
   READ_STR_FROM_XML_NODE(log_file_name, log_node);
@@ -60,7 +66,19 @@ Config::Config(const char* xmlfile) {
   m_log_sync_inteval = std::atoi(log_sync_interval_str.c_str());
   m_log_level = log_level_str;
 
+  READ_STR_FROM_XML_NODE(port, server_node);
+  READ_STR_FROM_XML_NODE(io_threads, server_node);
+
+  m_port = std::atoi(port_str.c_str());
+  m_io_threads = std::atoi(io_threads_str.c_str());
+
+  printf("Server --PORT[%d], IO Threads[%d]\n", m_port, m_io_threads);
+
 }
 
+Config::Config() {
+  m_log_level = "DEBUG";
+  
+}
 
 }

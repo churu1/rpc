@@ -15,9 +15,9 @@ Logger* Logger::GetGlobalLogger() {
   return g_logger;
 }
 
-void Logger::InitGlobalLogger() {
+void Logger::InitGlobalLogger(int type /*=1*/) {
   LogLevel global_log_level = StringToLogLevel(Config::GetGlobalConfig()->m_log_level);
-  g_logger = new Logger(global_log_level);
+  g_logger = new Logger(global_log_level, 0);
   g_logger->init();
 }
 
@@ -92,7 +92,10 @@ std::string LogEvent::toString() {
   return ss.str();
 }
 
-Logger::Logger(LogLevel level) : m_set_level(level) {
+Logger::Logger(LogLevel level, int type /*=1*/) : m_set_level(level), m_type(type){
+  if (m_type == 0) {
+    return;
+  }
   m_async_logger = std::make_shared<AsyncLogger>(Config::GetGlobalConfig()->m_log_file_name + "_rpc",
   Config::GetGlobalConfig()->m_log_file_path,
   Config::GetGlobalConfig()->m_log_max_file_size);
@@ -104,6 +107,10 @@ Logger::Logger(LogLevel level) : m_set_level(level) {
 
 void Logger::pushLog(const std::string &msg)
 {
+  if (m_type == 0) {
+    printf((msg + "\n").c_str());
+    return;
+  }
   ScopeMutex<Mutex> lock(m_mutex);
   m_buffer.push_back(msg);
   lock.unlock();
@@ -140,7 +147,9 @@ void Logger::syncloop() {
 }
 
 void Logger::init() {
-
+  if (m_type == 0) {
+    return;
+  }
   m_timer_event = std::make_shared<TimerEvent>(Config::GetGlobalConfig()->m_log_sync_inteval, true, std::bind(&Logger::syncloop, this));
   EventLoop::GetCurrentEventLoop()->addTimerEvent(m_timer_event);
 }

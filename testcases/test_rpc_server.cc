@@ -34,29 +34,29 @@ class OrderImpl : public Order {
     }
     response->set_order_id("20240816");
     APPDEBUGLOG("call  makeOrder success");
-
   }
-
 
 };
 
-void test_tcp_server() {
-  rocket::IPNetAddr::s_ptr addr = std::make_shared<rocket::IPNetAddr>("127.0.0.1", 12346);
-  DEBUGLOG("create addr %s", addr->toString().c_str());
-  
-  rocket::TcpServer tcp_server(addr);
-
-  tcp_server.start();
-}
 
 
-int main() {
+int main(int argc, char* argv[]) {
 
-  rocket::Config::SetGlobalConfig("../conf/rocket.xml");
+  if (argc != 2) {
+    printf("Start test _rpc_server error, argc not 2\n");
+    printf("Start like this:\n");
+    printf("./test_rpc_server ../conf/rocket.xml\n");
+    return 0;
+  }
+
+  rocket::Config::SetGlobalConfig(argv[1]);
   rocket::Logger::InitGlobalLogger();
   std::shared_ptr<OrderImpl> service = std::make_shared<OrderImpl>();
   rocket::RpcDispatcher::GetRpcDispatcher()->registerService(service);
 
-  test_tcp_server();
+  rocket::IPNetAddr::s_ptr addr = std::make_shared<rocket::IPNetAddr>("127.0.0.1", rocket::Config::GetGlobalConfig()->m_port);
+  rocket::TcpServer tcp_server(addr);
+
+  tcp_server.start();
   return 0;
 }

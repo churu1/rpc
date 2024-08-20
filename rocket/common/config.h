@@ -7,6 +7,7 @@ namespace rocket {
 class Config {
  public:
   Config(const char* xmlfile);
+  Config();
 
  public:
   static Config* GetGlobalConfig();
@@ -17,6 +18,10 @@ class Config {
   std::string m_log_file_path;
   int m_log_max_file_size = 0;
   int m_log_sync_inteval = 0; // 日志同步间隔，ms
+
+
+  int m_port = 0;
+  int m_io_threads = 0;
 };
 
 }

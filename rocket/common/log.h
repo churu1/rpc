@@ -128,10 +128,10 @@ namespace rocket {
   class Logger {
    public:
     static Logger* GetGlobalLogger();
-    static void InitGlobalLogger();
+    static void InitGlobalLogger(int type = 1);
 
    public:  
-    Logger(LogLevel level);
+    Logger(LogLevel level, int type = 1);
     typedef std::shared_ptr<Logger> s_ptr;
     void pushLog(const std::string& msg);
     void pushAppLog(const std::string& msg);
@@ -157,6 +157,8 @@ namespace rocket {
     TimerEvent::s_ptr m_timer_event;
     AsyncLogger::s_ptr m_async_logger;
     AsyncLogger::s_ptr m_async_app_logger;
+
+    int m_type;
 
   };
 

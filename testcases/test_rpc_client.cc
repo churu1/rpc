@@ -79,6 +79,9 @@ void test_rcp_channel() {
     if (controller->GetErrorCode() == 0) {
       INFOLOG("call rpc success, request[%s], response[%s]", request->ShortDebugString().c_str(), response->ShortDebugString().c_str());
       // 执行业务逻辑
+      if (response->order_id() == "xxx") {
+
+      }
     } else {
       ERRORLOG("call rpc failed, request[%s], error code[%d], error info[%s]", request->ShortDebugString().c_str(), 
         controller->GetErrorCode(), controller->GetErrorInfo().c_str());
@@ -96,8 +99,8 @@ void test_rcp_channel() {
 
 int main() {
 
-  rocket::Config::SetGlobalConfig("../conf/rocket_client.xml");
-  rocket::Logger::InitGlobalLogger();
+  rocket::Config::SetGlobalConfig(NULL);
+  rocket::Logger::InitGlobalLogger(0);
 
   test_rcp_channel();
   return 0;
