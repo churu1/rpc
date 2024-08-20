@@ -10,63 +10,66 @@
 #include "rocket/net/wakeup_fd_event.h"
 #include "rocket/net/timer.h"
 
-
 namespace rocket {
-  class EventLoop {
-   public:
-    EventLoop();
+class EventLoop {
+ public:
+  EventLoop();
 
-    ~EventLoop();
+  ~EventLoop();
 
-    void loop();
+  void loop();
 
-    void wakeup();
+  void wakeup();
 
-    void stop();
+  void stop();
 
-    void addEpollEvent(FdEvent* event);
+  void addEpollEvent(FdEvent* event);
 
-    void deleteEpollEvent(FdEvent* event);
+  void deleteEpollEvent(FdEvent* event);
 
-    bool isInLoopThread();
+  bool isInLoopThread();
 
-    void addTask(std::function<void()> cb, bool is_wak_up = false);
-    
-    void addTimerEvent(TimerEvent::s_ptr event);
+  void addTask(std::function<void()> cb, bool is_wake_up = false);
 
-    static EventLoop* GetCurrentEventLoop();
+  void addTimerEvent(TimerEvent::s_ptr event);
 
-    bool isLooping();
-   private:
-    void dealWakeUp();
+  bool isLooping();
 
-    void initWakeUpFdEvent();
-
-    void initTimer();
+ public:
+  static EventLoop* GetCurrentEventLoop();
 
 
-   private:
-    pid_t m_thread_id = 0;
-    int m_epoll_fd = 0;
-    int m_wakeup_fd = 0;
-    WakeUpFdEvent* m_wakeup_fd_event = NULL;
+ private:
+  void dealWakeup();
 
-    bool m_stop_flag = false;
-    std::set<int> m_listen_fds;
+  void initWakeUpFdEevent();
 
-    std::queue<std::function<void()>> m_pthread_tasks;
+  void initTimer();
 
-    Mutex m_mutex;
+ private:
+  pid_t m_thread_id {0};
 
-    Timer* m_timer = NULL;
+  int m_epoll_fd {0};
 
-    bool m_is_looping = false;
-  };
+  int m_wakeup_fd {0};
 
+  WakeUpFdEvent* m_wakeup_fd_event {NULL};
+
+  bool m_stop_flag {false};
+
+  std::set<int> m_listen_fds;
+
+  std::queue<std::function<void()>> m_pending_tasks;
+  
+  Mutex m_mutex;
+
+  Timer* m_timer {NULL};
+
+  bool m_is_looping {false};
+
+};
 
 }
-
-
 
 
 #endif

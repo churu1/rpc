@@ -109,3 +109,11 @@ EPOLLHUP 和 EPOLLERR 错误
 fwrite(i.c_str(), 1, i.length(), logger->m_file_handler);
 
 tail -f 命令
+
+学一下proto文件的语法
+
+
+优化：
+1. 协程优化
+2. 1:N，请求响应不均匀，把所有连接放入公共队列，每个IO线程从公共队列中取出连接去执行
+3. 把服务接入服务注册中心，zookeeper, 使得RPC可以根据服务名找到对应的服务，支持负载均衡，容灾切换 

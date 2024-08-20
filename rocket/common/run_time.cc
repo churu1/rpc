@@ -1,10 +1,12 @@
+
 #include "rocket/common/run_time.h"
+
 namespace rocket {
 
-thread_local RunTime* t_run_time = NULL;
 
+thread_local RunTime* t_run_time = NULL; 
 
-RunTime *RunTime::GetRunTime() {
+RunTime* RunTime::GetRunTime() {
   if (t_run_time) {
     return t_run_time;
   }
@@ -13,5 +15,8 @@ RunTime *RunTime::GetRunTime() {
 }
 
 
+RpcInterface* RunTime::getRpcInterface() {
+  return m_rpc_interface;
+}
 
 }

@@ -37,7 +37,7 @@ TcpAcceptor::TcpAcceptor(NetAddr::s_ptr local_addr) : m_local_addr(local_addr){
 
 }
 
-std::pair<int, NetAddr::s_ptr> TcpAcceptor::accpet() {
+std::pair<int, NetAddr::s_ptr> TcpAcceptor::accept() {
   if (m_family == AF_INET) {
     sockaddr_in client_addr;
     memset(&client_addr, 0, sizeof(client_addr));

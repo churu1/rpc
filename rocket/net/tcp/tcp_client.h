@@ -34,7 +34,7 @@ class TcpClient {
 
   int getConnectErrorCode();
 
-  std::string getErrorInfo();
+  std::string getConnectionErrorInfo();
 
   NetAddr::s_ptr getPeerAddr();
   NetAddr::s_ptr getLocalAddr();

@@ -126,7 +126,7 @@ int TcpClient::getConnectErrorCode() {
   return m_connect_err_code;
 }
 
-std::string TcpClient::getErrorInfo() {
+std::string TcpClient::getConnectionErrorInfo() {
   return m_connect_err_info;
 }
 

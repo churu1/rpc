@@ -10,7 +10,7 @@ namespace rocket {
 
   }
 
-  void WakeUpFdEvent::wakeUp() {
+  void WakeUpFdEvent::wakeup() {
     char buf[8] = {'a'};
     int rt = write(m_fd, buf, 8);
     if (rt != 8) {

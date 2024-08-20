@@ -10,7 +10,7 @@ namespace rocket {
 
    ~WakeUpFdEvent();
 
-   void wakeUp();
+   void wakeup();
   private:
  
  };
